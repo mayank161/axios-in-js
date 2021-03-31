@@ -23,7 +23,7 @@ function getTodos() {
 
   // we can also write above code in shorter way
 
-  axios.get('https://jsonplaceholder.typicode.com/todos',{ params: { _limit: 5 }})
+  axios.get('https://jsonplaceholder.typicode.com/todos',{ params: { _limit: 5 }},{timeout: 5000})
   .then(res => showOutput(res)) 
   .catch(err => console.log(err));
 }
@@ -160,7 +160,21 @@ function errorHandling() {
 
 // CANCEL TOKEN
 function cancelToken() {
-  console.log('Cancel Token');
+  const source = axios.CancelToken.source();
+   
+  axios.get('https://jsonplaceholder.typicode.com/todos',{
+    cancelToken: source.token
+  })
+  .then(res => showOutput(res))
+  .catch(thrown => {
+    if(axios.isCancel(thrown)) {
+      console.log('Request canceled',thrown.message);
+    }
+  });
+
+  if(true) {
+    source.cancel('Request canceled by user');
+  }
 }
 
 // INTERCEPTING REQUESTS & RESPONSES
@@ -177,6 +191,14 @@ axios.interceptors.request.use(
 );
 
 // AXIOS INSTANCES
+// instance will is a type of shortcut so whenever we called it called the instance of it
+const axiosInstance = axios.create({ // it will create a axios in which you define that axios settings
+    baseURL: 'https://jsonplaceholder.typicode.com' // it just gives the base url so can add in it to get the particular page
+});
+
+axiosInstance.get('/comments',{params: {
+_limit: 5
+}}).then(res => showOutput(res)); // so we are calling instance of axios which contains the base url
 
 // Show output in browser
 function showOutput(res) {
